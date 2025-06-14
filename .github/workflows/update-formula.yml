@@ -26,9 +26,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ github.event.inputs.version }}
         run: |
-          # Download tarballs and calculate SHA256
-          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-macos.tar.gz" | sha256sum | cut -d' ' -f1)
-          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-linux.tar.gz" | sha256sum | cut -d' ' -f1)
+          # Get SHA256 hashes from release files
+          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-macos.sha256" | cut -d' ' -f1)
+          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-linux.sha256" | cut -d' ' -f1)
           
           # Update formula file
           sed -i "s/version \".*\"/version \"${{ env.VERSION }}\"/" Formula/${{ env.FORMULA_NAME }}.rb
