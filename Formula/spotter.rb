@@ -3,7 +3,7 @@
 class Spotter < Formula
   desc "AWS EC2 Spot Instance Advisor CLI Tool"
   homepage "https://github.com/kohbis/spotter"
-  version "v0.1.1"
+  version "v0.1.2"
 
   on_macos do
     url "https://github.com/kohbis/spotter/releases/download/#{version}/spotter-macos.tar.gz" # macos
