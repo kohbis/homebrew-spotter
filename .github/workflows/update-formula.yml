@@ -25,27 +25,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ github.event.inputs.version }}
-        
         run: |
           # Get SHA256 hashes from release files
-          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${VERSION}/${{ env.FORMULA_NAME }}-macos.sha256")
-          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${VERSION}/${{ env.FORMULA_NAME }}-linux.sha256")
+          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-macos.sha256")
+          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-linux.sha256")
           
           # Update formula file
-          sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/${{ env.FORMULA_NAME }}.rb
-          sed -i "s/sha256 \".*\" # macos/sha256 \"${MACOS_SHA256}\" # macos/" Formula/${{ env.FORMULA_NAME }}.rb
-          sed -i "s/sha256 \".*\" # linux/sha256 \"${LINUX_SHA256}\" # linux/" Formula/${{ env.FORMULA_NAME }}.rb
+          sed -i "s/version \".*\"/version \"${{ env.VERSION }}\"/" Formula/${{ env.FORMULA_NAME }}.rb
+          sed -i "s/sha256 \".*\"/sha256 \"${MACOS_SHA256}\"/" Formula/${{ env.FORMULA_NAME }}.rb
+          sed -i "s/sha256 \".*\"/sha256 \"${LINUX_SHA256}\"/" Formula/${{ env.FORMULA_NAME }}.rb
           
           # Create branch and commit
-          git checkout -b update-formula-${VERSION}
+          git checkout -b update-formula-${{ env.VERSION }}
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Formula/${{ env.FORMULA_NAME }}.rb
-          git commit -m "Update formula to ${VERSION}"
-          git push origin update-formula-${VERSION}
+          git commit -m "Update formula to ${{ env.VERSION }}"
+          git push origin update-formula-${{ env.VERSION }}
 
           # Create PR
           gh pr create \
             --base main \
-            --title "Update formula to ${VERSION}" \
-            --body "This PR updates the formula to version ${VERSION}."
+            --title "Update formula to ${{ env.VERSION }}" \
+            --body "This PR updates the formula to version ${{ env.VERSION }}."
