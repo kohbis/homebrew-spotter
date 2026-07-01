@@ -26,6 +26,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ github.event.inputs.version }}
         run: |
+          BRANCH_NAME="update-formula-${{ env.VERSION }}"
+
           # Get SHA256 hashes from release files
           MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-macos.sha256" | cut -d' ' -f1)
           LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-linux.sha256" | cut -d' ' -f1)
@@ -36,15 +38,20 @@ jobs:
           sed -i "s/sha256 \".*\" # linux/sha256 \"${LINUX_SHA256}\" # linux/" Formula/${{ env.FORMULA_NAME }}.rb
           
           # Create branch and commit
-          git checkout -b update-formula-${{ env.VERSION }}
+          git checkout -B "${BRANCH_NAME}"
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Formula/${{ env.FORMULA_NAME }}.rb
           git commit -m "Update formula to ${{ env.VERSION }}"
-          git push origin update-formula-${{ env.VERSION }}
+          git push --force-with-lease origin "${BRANCH_NAME}"
 
           # Create PR
-          gh pr create \
-            --base main \
-            --title "Update formula to ${{ env.VERSION }}" \
-            --body "This PR updates the formula to version ${{ env.VERSION }}."
+          if [ -n "$(gh pr list --head "${BRANCH_NAME}" --base main --state open --json number --jq '.[0].number')" ]; then
+            echo "Pull request for ${BRANCH_NAME} already exists."
+          else
+            gh pr create \
+              --base main \
+              --head "${BRANCH_NAME}" \
+              --title "Update formula to ${{ env.VERSION }}" \
+              --body "This PR updates the formula to version ${{ env.VERSION }}."
+          fi
