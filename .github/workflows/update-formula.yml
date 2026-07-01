@@ -11,6 +11,10 @@ on:
 env:
   FORMULA_NAME: spotter
 
+concurrency:
+  group: update-formula-${{ github.event.inputs.version }}
+  cancel-in-progress: false
+
 jobs:
   update-formula:
     runs-on: ubuntu-latest
@@ -46,8 +50,9 @@ jobs:
           git push --force-with-lease origin "${BRANCH_NAME}"
 
           # Create PR
-          if [ -n "$(gh pr list --head "${BRANCH_NAME}" --base main --state open --json number --jq '.[0].number')" ]; then
-            echo "Pull request for ${BRANCH_NAME} already exists."
+          EXISTING_PR_URL=$(gh pr list --head "${BRANCH_NAME}" --base main --state open --json url --jq '.[0].url')
+          if [ -n "${EXISTING_PR_URL}" ]; then
+            echo "Pull request already exists: ${EXISTING_PR_URL}"
           else
             gh pr create \
               --base main \
