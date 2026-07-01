@@ -33,11 +33,11 @@ jobs:
           BRANCH_NAME="update-formula-${VERSION}"
 
           # Get SHA256 hashes from release files
-          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-macos.sha256" | cut -d' ' -f1)
-          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${{ env.VERSION }}/${{ env.FORMULA_NAME }}-linux.sha256" | cut -d' ' -f1)
+          MACOS_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${VERSION}/${{ env.FORMULA_NAME }}-macos.sha256" | cut -d' ' -f1)
+          LINUX_SHA256=$(curl -sL "https://github.com/kohbis/${{ env.FORMULA_NAME }}/releases/download/${VERSION}/${{ env.FORMULA_NAME }}-linux.sha256" | cut -d' ' -f1)
           
           # Update formula file
-          sed -i "s/version \".*\"/version \"${{ env.VERSION }}\"/" Formula/${{ env.FORMULA_NAME }}.rb
+          sed -i "s/version \".*\"/version \"${VERSION}\"/" Formula/${{ env.FORMULA_NAME }}.rb
           sed -i "s/sha256 \".*\" # macos/sha256 \"${MACOS_SHA256}\" # macos/" Formula/${{ env.FORMULA_NAME }}.rb
           sed -i "s/sha256 \".*\" # linux/sha256 \"${LINUX_SHA256}\" # linux/" Formula/${{ env.FORMULA_NAME }}.rb
           
@@ -46,7 +46,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add Formula/${{ env.FORMULA_NAME }}.rb
-          git commit -m "Update formula to ${{ env.VERSION }}"
+          git commit -m "Update formula to ${VERSION}"
           git push --force-with-lease origin "${BRANCH_NAME}"
 
           # Create PR
@@ -57,6 +57,6 @@ jobs:
             gh pr create \
               --base main \
               --head "${BRANCH_NAME}" \
-              --title "Update formula to ${{ env.VERSION }}" \
-              --body "This PR updates the formula to version ${{ env.VERSION }}."
+              --title "Update formula to ${VERSION}" \
+              --body "This PR updates the formula to version ${VERSION}."
           fi
